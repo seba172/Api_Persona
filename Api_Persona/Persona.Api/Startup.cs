@@ -6,10 +6,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Persona.Dominio;
+using Persona.Interfaces;
+using Persona.Repositorio;
 
 namespace Persona.Api
 {
@@ -26,6 +30,17 @@ namespace Persona.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            services.AddScoped<PersonaContext>();
+            services.AddDbContext<PersonaContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("PersonaContext"));
+                options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            });
+
+            services.AddTransient<IPersonaDominio, PersonaDominio>();
+            services.AddTransient<IConfiguracionDominio, ConfiguracionDominio>();
+            services.AddScoped(typeof(IRepositorio<>), typeof(Repositorio<>));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

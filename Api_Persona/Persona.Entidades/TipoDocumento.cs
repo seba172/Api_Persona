@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace Persona.Entidades
 {
     public class TipoDocumento
     {
+        [Key]
         public byte Id { get; set; }
-        public int Descripcion { get; set; }
+        public string Descripcion { get; set; }
     }
 }

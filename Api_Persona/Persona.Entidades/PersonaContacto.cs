@@ -1,17 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Persona.Entidades
 {
     public class PersonaContacto
     {
+        [Key]
         public int Id { get; set; }
         public int IdPersona { get; set; }
-        public int IdTipoContacto { get; set; }
-        public int Valor { get; set; }
+        public string Valor { get; set; }
 
+        [ForeignKey("IdPersona")]
         public Persona Persona { get; set; }
-        public TipoContacto TipoContacto { get; set; }
     }
 }

@@ -4,4 +4,9 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Persona.Interfaces\Persona.Interfaces.csproj" />
+    <ProjectReference Include="..\Perssona.Framework\Persona.Framework.csproj" />
+  </ItemGroup>
+
 </Project>

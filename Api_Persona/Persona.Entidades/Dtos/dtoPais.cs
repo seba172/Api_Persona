@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Persona.Entidades
+namespace Persona.Entidades.Dtos
 {
-    public class TipoContacto
+    public class dtoPais
     {
-        public byte Id { get; set; }
+        public int Id { get; set; }
         public string Descripcion { get; set; }
     }
 }
