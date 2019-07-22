@@ -14,6 +14,7 @@ using Microsoft.Extensions.Options;
 using Persona.Dominio;
 using Persona.Interfaces;
 using Persona.Repositorio;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace Persona.Api
 {
@@ -39,8 +40,12 @@ namespace Persona.Api
             });
 
             services.AddTransient<IPersonaDominio, PersonaDominio>();
-            services.AddTransient<IConfiguracionDominio, ConfiguracionDominio>();
             services.AddScoped(typeof(IRepositorio<>), typeof(Repositorio<>));
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "API Persona", Version = "v1", Description = "Desafio tecnico" });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -58,6 +63,16 @@ namespace Persona.Api
 
             app.UseHttpsRedirection();
             app.UseMvc();
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+            // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Persona V1");
+            });
         }
     }
 }

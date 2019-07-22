@@ -12,13 +12,14 @@ namespace Persona.Entidades.Dtos
         public string NumeroDocumento { get; set; }
         public byte? IdTipoDocumento { get; set; }
         public Int16? IdPais { get; set; }
-        public string Sexo { get; set; }
+        public byte? IdSexo { get; set; }
         public DateTime? FechaNacimiento { get; set; }
 
-        public List<dtoContacto> Contactos { get; set; }
+        public List<dtoContacto> PersonaContacto { get; set; }
 
         public string Pais { get; set; }
         public string TipoDocumento { get; set; }
+        public string Sexo { get; set; }
 
     }
 }

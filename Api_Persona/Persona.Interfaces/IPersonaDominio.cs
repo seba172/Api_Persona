@@ -10,7 +10,8 @@ namespace Persona.Interfaces
     {
         Task<dtoPersona> ObtenerPersonaAsync(int id);
         Task<List<dtoPersona>> ObtenerListadoPersonasAsync();
-        Task<Entidades.Persona> GuardarPersonaAsync(dtoPersona dtoPersona);
+        Task<dtoPersona> GuardarPersonaAsync(Entidades.Persona Persona);
         Task EliminarPersonaAsync(int id);
+        Task<dtoEstadisticas> ObtenerEstadisticasAsync();
     }
 }

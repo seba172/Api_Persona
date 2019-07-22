@@ -25,7 +25,15 @@ namespace Persona.Api.Controllers
 
         // GET: api/<controller>
         [HttpGet]
+        /// <summary>
+        /// Devuelve un listado de personas.
+        /// </summary>
+        /// <returns>Listado de persona</returns>
+        /// <response code="200">Retorna un listado de persona</response>
         [Produces(typeof(List<dtoPersona>))]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> Get()
         {
             try
@@ -44,16 +52,25 @@ namespace Persona.Api.Controllers
 
         // GET api/<controller>/5
         [HttpGet("{id}")]
+        /// <summary>
+        /// Devuelve una Persona.
+        /// </summary>
+        /// <returns>Una persona</returns>
+        /// <response code="200">Retorna una persona</response>
         [Produces(typeof(dtoPersona))]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> GetAsync(int id)
         {
             try
             {
-                var persona = await PersonaDominio.ObtenerPersonaAsync(id);
+                dtoPersona persona = await PersonaDominio.ObtenerPersonaAsync(id);
                 if (persona == null)
                 {
                     return NotFound();
-                }
+                }                
 
                 return Ok(persona);
             }
@@ -74,11 +91,16 @@ namespace Persona.Api.Controllers
         /// </summary>
         /// <returns>Una nueva persona creada</returns>
         /// <response code="201">Retorna la nueva persona creada</response>
-        public async Task<IActionResult> Post([FromBody]dtoPersona dtoPersona)
+        [Produces(typeof(dtoPersona))]        
+        [ProducesResponseType(201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> Post([FromBody]Entidades.Persona persona)
         {
             try
             {
-                return StatusCode((int)HttpStatusCode.Created, await PersonaDominio.GuardarPersonaAsync(dtoPersona));
+                dtoPersona personaGuardada = await PersonaDominio.GuardarPersonaAsync(persona);
+                return StatusCode((int)HttpStatusCode.Created, personaGuardada);
             }
             catch (DatosInvalidosException ex)
             {
@@ -92,20 +114,84 @@ namespace Persona.Api.Controllers
 
         // PUT api/<controller>/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody]string value)
+        /// <summary>
+        /// Actualiza una Persona.
+        /// </summary>
+        /// <returns>Persona actualizar</returns>
+        /// <response code="200">Retorna la persona actualizada</response>
+        [Produces(typeof(dtoPersona))]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> Put(int id, [FromBody]Entidades.Persona persona)
         {
-            return Ok();
+            try
+            {
+                if (await PersonaDominio.ObtenerPersonaAsync(id) == null)
+                {
+                    return NotFound();
+                }
+
+                persona.Id = id;
+                return Ok(await PersonaDominio.GuardarPersonaAsync(persona));
+            }
+            catch (DatosInvalidosException ex)
+            {
+                return BadRequest(Errores.GetModelStateErrores(ex.Data));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         // DELETE api/<controller>/5
         [HttpDelete("{id}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                await PersonaDominio.EliminarPersonaAsync(id);
+                if (await PersonaDominio.ObtenerPersonaAsync(id) == null)
+                {
+                    return NotFound();
+                }
 
+                await PersonaDominio.EliminarPersonaAsync(id);
                 return Ok();
+            }
+            catch (DatosInvalidosException ex)
+            {
+                return BadRequest(Errores.GetModelStateErrores(ex.Data));
+            }
+            catch
+            {
+                return StatusCode(500);
+            }
+        }
+
+
+        // GET: api/<controller>/estadisticas
+        [HttpGet]
+        /// <summary>
+        /// Devuelve estadisticas de personas.
+        /// </summary>
+        /// <returns>estadistica</returns>
+        /// <response code="200">Retorna un estadisticas de persona</response>
+        [Produces(typeof(dtoEstadisticas))]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        [Route("estadisticas")]
+        public async Task<IActionResult> GetEstadisticas()
+        {
+            try
+            {
+                return Ok(await PersonaDominio.ObtenerEstadisticasAsync());
             }
             catch (DatosInvalidosException ex)
             {

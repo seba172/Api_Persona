@@ -13,7 +13,7 @@ namespace Persona.Interfaces
         Task ActualizarAsync(TEntity Entidad);
         void Actualizar(TEntity Entidad);
         Task EliminarAsync(TEntity Entidad);
-        Task<TEntity> ObtenerPorIDAsync(Int32 ID, params Expression<Func<TEntity, Object>>[] Includes);
+        Task<TEntity> ObtenerPorIDAsync<id>(id ID, params Expression<Func<TEntity, Object>>[] Includes);
         Task<TEntity> ObtenerUnoAsync(Expression<Func<TEntity, Boolean>> Filtro, params Expression<Func<TEntity, Object>>[] Includes);
         Task<List<TEntity>> ObtenerListadoAsync(params Expression<Func<TEntity, Object>>[] Includes);
         Task<List<TEntity>> ObtenerListadoAsync(Expression<Func<TEntity, bool>> Filtro, params Expression<Func<TEntity, Object>>[] Includes);  

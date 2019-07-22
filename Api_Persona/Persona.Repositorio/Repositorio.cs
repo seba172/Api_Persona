@@ -95,7 +95,7 @@ namespace Persona.Repositorio
         #endregion
 
         #region ObtenerByID
-        public virtual async Task<TEntity> ObtenerPorIDAsync(Int32 ID, params Expression<Func<TEntity, Object>>[] Includes)
+        public virtual async Task<TEntity> ObtenerPorIDAsync<id>(id ID, params Expression<Func<TEntity, Object>>[] Includes)
         {
             try
             {

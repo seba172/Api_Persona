@@ -10,11 +10,11 @@ namespace Persona.Entidades
     {
         [Key]
         public int Id { get; set; }
-        [MaxLength(50, ErrorMessage = "Máximo 50 caracteres")]
+        [MaxLength(50)]
         public string Nombre { get; set; }
-        [MaxLength(50, ErrorMessage = "Máximo 50 caracteres")]
+        [MaxLength(50)]
         public string Apellido { get; set; }
-        [MaxLength(12, ErrorMessage = "Máximo 12 caracteres")]
+        [MaxLength(12)]
         [Required]
         public string NumeroDocumento { get; set; }
         [Required]
@@ -22,7 +22,7 @@ namespace Persona.Entidades
         [Required]    
         public Int16 IdPais { get; set; }
         [Required]
-        public string Sexo { get; set; }
+        public byte IdSexo { get; set; }
         [Required]
         public DateTime FechaNacimiento { get; set; }
 
@@ -30,6 +30,8 @@ namespace Persona.Entidades
         public TipoDocumento TipoDocumento { get; set; }
         [ForeignKey("IdPais")]
         public Pais Pais { get; set; }
+        [ForeignKey("IdSexo")]
+        public Sexo Sexo { get; set; }
 
         public List<PersonaContacto> PersonaContacto { get; set; }
     }
