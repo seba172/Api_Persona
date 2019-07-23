@@ -24,6 +24,7 @@ namespace Persona.Entidades
         [Required]
         public byte IdSexo { get; set; }
         [Required]
+        [DataType(DataType.Date)]
         public DateTime FechaNacimiento { get; set; }
 
         [ForeignKey("IdTipoDocumento")]

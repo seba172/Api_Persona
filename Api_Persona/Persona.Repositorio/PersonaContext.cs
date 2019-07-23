@@ -14,5 +14,7 @@ namespace Persona.Repositorio
         public DbSet<Entidades.PersonaContacto> PersonaContacto { get; set; }
         public DbSet<Entidades.TipoDocumento> TipoDocumento { get; set; }
         public DbSet<Entidades.Sexo> Sexo { get; set; }      
+        public DbSet<Entidades.PersonaRelacion> PersonaRelacion { get; set; }      
+        public DbSet<Entidades.TipoRelacion> TipoRelacion { get; set; }
     }
 }

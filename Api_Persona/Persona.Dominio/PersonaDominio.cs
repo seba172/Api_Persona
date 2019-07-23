@@ -14,11 +14,15 @@ namespace Persona.Dominio
     {
         readonly IRepositorio<Entidades.Persona> PersonaRepositorio;
         readonly IRepositorio<PersonaContacto> PersonaContactoRepositorio;
+        readonly IRepositorio<PersonaRelacion> PersonaRelacionRepositorio;
+        readonly IRepositorio<TipoRelacion> TipoRelacionRepositorio;
 
-        public PersonaDominio(IRepositorio<Entidades.Persona> _personaRepositorio, IRepositorio<Entidades.PersonaContacto> _personaContactoRepositorio)
+        public PersonaDominio(IRepositorio<Entidades.Persona> _personaRepositorio, IRepositorio<Entidades.PersonaContacto> _personaContactoRepositorio, IRepositorio<PersonaRelacion> _personaRelacionRepositorio, IRepositorio<TipoRelacion> _tipoRelacionRepositorio)
         {
             PersonaRepositorio = _personaRepositorio;
             PersonaContactoRepositorio = _personaContactoRepositorio;
+            PersonaRelacionRepositorio = _personaRelacionRepositorio;
+            TipoRelacionRepositorio = _tipoRelacionRepositorio;
         }
 
         public async Task<List<dtoPersona>> ObtenerListadoPersonasAsync()
@@ -58,7 +62,27 @@ namespace Persona.Dominio
             {
                 return null;
             }
-            return MapearEntidadADto(persona);
+            return new dtoPersona
+            {
+                Apellido = persona.Apellido,
+                Nombre = persona.Nombre,
+                Id = persona.Id,
+                NumeroDocumento = persona.NumeroDocumento,
+                FechaNacimiento = persona.FechaNacimiento,
+                IdSexo = persona.IdSexo,
+                Sexo = persona.Sexo.Descripcion,
+                TipoDocumento = persona.TipoDocumento.Descripcion,
+                Pais = persona.Pais.Descripcion,
+                IdTipoDocumento = persona.IdTipoDocumento,
+                IdPais = persona.IdPais,
+                PersonaContacto = (from contactos in persona.PersonaContacto
+                                   select new dtoContacto
+                                   {
+                                       idContacto = contactos.Id,
+                                       idPersona = contactos.IdPersona,
+                                       Valor = contactos.Valor
+                                   }).ToList(),
+            };
         }
     
         public async Task<dtoPersona> GuardarPersonaAsync(Entidades.Persona personaAGuardar)
@@ -157,13 +181,11 @@ namespace Persona.Dominio
 
         public async Task<dtoEstadisticas> ObtenerEstadisticasAsync()
         {
-            int cantidadMujeres = 0;
-            int cantidadHombres = 0;
-            int cantidadArgentinos = 0;
+            int cantidadMujeres = 0, cantidadHombres = 0, cantidadArgentinos = 0, totalPersonas = 0;
 
             List<Entidades.Persona> personas = await PersonaRepositorio.ObtenerListadoAsync();
 
-            int totalPersonas = personas.Count();
+            totalPersonas = personas.Count();
 
             for (int i = 0; i < totalPersonas; i++)
             {
@@ -186,8 +208,49 @@ namespace Persona.Dominio
             {
                 CantidadHombres = cantidadHombres,
                 CantidadMujeres = cantidadMujeres,
-                PorcentajeArgentinos = cantidadArgentinos * 100 / (totalPersonas == 0 ? 1 : totalPersonas)
+                PorcentajeArgentinos = Math.Round((double)cantidadArgentinos * 100 / (totalPersonas == 0 ? 1 : totalPersonas),2)
             };
+        }
+
+        public async Task<dtoPersonaRelacion> GuardarRelacionPadreAsync(int idPersona1, int idPersona2)
+        {
+            PersonaRelacion personaRelacion = await ObtenerPersonaRelacionPrivadoAsync(idPersona1, idPersona2);
+            if (personaRelacion == null)
+            {
+                personaRelacion = await ObtenerPersonaRelacionPrivadoAsync(idPersona2, idPersona1);
+                if (personaRelacion == null)
+                {
+                    personaRelacion = await PersonaRelacionRepositorio.InsertarAsync(new PersonaRelacion() { IdPersona1 = idPersona1, IdPersona2 = idPersona2, IdTipoRelacion = (byte)Entidades.Enumeraciones.TipoRelacionEnum.Padre });
+                }
+                else
+                {
+                    DatosInvalidosException datosInvalidos = new DatosInvalidosException();
+                    datosInvalidos.Data.Add("Relacion Existente", "La persona " + idPersona1 + " ya se tiene una relacion registrada de " +  personaRelacion.TipoRelacion.Descripcion + "con la persona " + idPersona2);
+                    throw datosInvalidos;    
+                }
+            }
+            else
+            {
+                if (personaRelacion.IdTipoRelacion != (byte)Entidades.Enumeraciones.TipoRelacionEnum.Padre)
+                {
+                    DatosInvalidosException datosInvalidos = new DatosInvalidosException();
+                    datosInvalidos.Data.Add("Relacion Existente", "La persona " + idPersona1 + " ya se tiene una relacion registrada de " + personaRelacion.TipoRelacion.Descripcion + "con la persona " + idPersona2);
+                    throw datosInvalidos;
+                }
+            }
+
+            TipoRelacion tipoRelacion = await TipoRelacionRepositorio.ObtenerUnoAsync(tr => tr.Id == personaRelacion.IdTipoRelacion);
+            return new dtoPersonaRelacion() { IdPersona1 = idPersona1, IdPersona2 = idPersona2, IdPersonaRelacion = personaRelacion.Id, Relacion = tipoRelacion.Descripcion };
+        }
+
+        public async Task<dtoTipoRelacion> ObtenerRelacionAsync(int idPersona1, int idPersona2)
+        {
+            PersonaRelacion personaRelacion = await ObtenerPersonaRelacionPrivadoAsync(idPersona1, idPersona2);
+            if (personaRelacion == null)
+            {
+                return null;
+            }
+            return new dtoTipoRelacion() { Relacion = personaRelacion.TipoRelacion.Descripcion };
         }
 
         private async Task<bool> ValidarDatosObligatoriosPersona(Entidades.Persona persona)
@@ -221,34 +284,14 @@ namespace Persona.Dominio
             }
         }
 
-        private dtoPersona MapearEntidadADto(Entidades.Persona persona)
-        {
-            return new dtoPersona
-            {
-                Apellido = persona.Apellido,
-                Nombre = persona.Nombre,
-                Id = persona.Id,
-                NumeroDocumento = persona.NumeroDocumento,
-                FechaNacimiento = persona.FechaNacimiento,
-                IdSexo = persona.IdSexo,
-                Sexo = persona.Sexo.Descripcion,
-                TipoDocumento = persona.TipoDocumento.Descripcion,
-                Pais = persona.Pais.Descripcion,
-                IdTipoDocumento = persona.IdTipoDocumento,
-                IdPais = persona.IdPais,
-                PersonaContacto = (from contactos in persona.PersonaContacto
-                             select new dtoContacto
-                             {
-                                 idContacto = contactos.Id,
-                                 idPersona = contactos.IdPersona,
-                                 Valor = contactos.Valor
-                             }).ToList(),
-            };
-        }
-
         private async Task<Entidades.Persona> ObtenerPersonaPrivadoAsync(int id)
         {
             return await PersonaRepositorio.ObtenerUnoAsync(p => p.Id == id, p => p.Pais, p => p.TipoDocumento, p => p.PersonaContacto, p => p.Sexo);           
+        }
+
+        private async Task<PersonaRelacion> ObtenerPersonaRelacionPrivadoAsync(int idPersona1, int idPersona2)
+        {
+            return await PersonaRelacionRepositorio.ObtenerUnoAsync(r => r.IdPersona1 == idPersona1 && r.IdPersona2 == idPersona2, r => r.TipoRelacion);
         }
     }
 }

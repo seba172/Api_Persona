@@ -13,5 +13,7 @@ namespace Persona.Interfaces
         Task<dtoPersona> GuardarPersonaAsync(Entidades.Persona Persona);
         Task EliminarPersonaAsync(int id);
         Task<dtoEstadisticas> ObtenerEstadisticasAsync();
+        Task<dtoPersonaRelacion> GuardarRelacionPadreAsync(int idPersona1, int idPersona2);
+        Task<dtoTipoRelacion> ObtenerRelacionAsync(int idPersona1, int idPersona2);
     }
 }

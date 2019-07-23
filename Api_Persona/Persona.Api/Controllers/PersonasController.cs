@@ -99,6 +99,11 @@ namespace Persona.Api.Controllers
         {
             try
             {
+                if (persona == null)
+                {
+                    return BadRequest();
+                }
+
                 dtoPersona personaGuardada = await PersonaDominio.GuardarPersonaAsync(persona);
                 return StatusCode((int)HttpStatusCode.Created, personaGuardada);
             }
@@ -128,6 +133,11 @@ namespace Persona.Api.Controllers
         {
             try
             {
+                if (persona == null)
+                {
+                    return BadRequest();
+                }
+
                 if (await PersonaDominio.ObtenerPersonaAsync(id) == null)
                 {
                     return NotFound();
@@ -174,24 +184,71 @@ namespace Persona.Api.Controllers
             }
         }
 
-
-        // GET: api/<controller>/estadisticas
-        [HttpGet]
+        // POST api/<controller>/idPersona1/padre/idPersona2
+        [HttpPost]
         /// <summary>
-        /// Devuelve estadisticas de personas.
+        /// Crea relacion de padre.
         /// </summary>
-        /// <returns>estadistica</returns>
-        /// <response code="200">Retorna un estadisticas de persona</response>
-        [Produces(typeof(dtoEstadisticas))]
-        [ProducesResponseType(200)]
+        /// <returns>Una nueva relacion creada</returns>
+        /// <response code="201">Retorna la relacion creada</response>
+        [Produces(typeof(dtoPersonaRelacion))]
+        [ProducesResponseType(201)]
         [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        [Route("estadisticas")]
-        public async Task<IActionResult> GetEstadisticas()
+        [Route("{idPersona1:int}/padre/{idPersona2:int}")]
+        public async Task<IActionResult> PostRelacion([FromRoute]int idPersona1, [FromRoute]int idPersona2)
         {
             try
             {
-                return Ok(await PersonaDominio.ObtenerEstadisticasAsync());
+                if (await PersonaDominio.ObtenerPersonaAsync(idPersona1) == null || await PersonaDominio.ObtenerPersonaAsync(idPersona2) == null)
+                {
+                    return NotFound();
+                }
+
+                dtoPersonaRelacion relacionGuardada = await PersonaDominio.GuardarRelacionPadreAsync(idPersona1, idPersona2);
+                return StatusCode((int)HttpStatusCode.Created, relacionGuardada);
+            }
+            catch (DatosInvalidosException ex)
+            {
+                return BadRequest(Errores.GetModelStateErrores(ex.Data));
+            }
+            catch
+            {
+                return StatusCode(500);
+            }
+        }
+
+        // GET: api/<controller>/relaciones/1/2
+        [HttpGet]
+        /// <summary>
+        /// Devuelve relacion entre dos personas.
+        /// </summary>
+        /// <returns>relacion</returns>
+        /// <response code="200">Retorna la relacion entre dos personas</response>
+        [Produces(typeof(dtoTipoRelacion))]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        [Route("relaciones/{idPersona1}/{idPersona2}")]
+        public async Task<IActionResult> GetRelaciones(int idPersona1, int idPersona2)
+        {
+            try
+            {
+                if (await PersonaDominio.ObtenerPersonaAsync(idPersona1) == null || await PersonaDominio.ObtenerPersonaAsync(idPersona2) == null)
+                {
+                    return NotFound();
+                }
+
+                dtoTipoRelacion dtoTipoRelacion = await PersonaDominio.ObtenerRelacionAsync(idPersona1, idPersona2);
+
+                if (dtoTipoRelacion == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(dtoTipoRelacion);
             }
             catch (DatosInvalidosException ex)
             {
