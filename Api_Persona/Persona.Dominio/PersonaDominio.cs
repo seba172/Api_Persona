@@ -214,6 +214,13 @@ namespace Persona.Dominio
 
         public async Task<dtoPersonaRelacion> GuardarRelacionPadreAsync(int idPersona1, int idPersona2)
         {
+            if (idPersona1 == idPersona2)
+            {
+                DatosInvalidosException datosInvalidos = new DatosInvalidosException();
+                datosInvalidos.Data.Add("Relacion Invalida", "Una persona no puede ser padre de si mismo");
+                throw datosInvalidos;
+            }
+
             PersonaRelacion personaRelacion = await ObtenerPersonaRelacionPrivadoAsync(idPersona1, idPersona2);
             if (personaRelacion == null)
             {
