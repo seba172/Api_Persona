@@ -65,12 +65,15 @@ namespace Persona.Dominio
         {
             try
             {
-                Entidades.Persona persona = new Entidades.Persona();
                 await ValidarDatosObligatoriosPersona(personaAGuardar);
+                Entidades.Persona persona = new Entidades.Persona();
+                personaAGuardar.Pais = null;
+                personaAGuardar.Sexo = null;
+                personaAGuardar.TipoDocumento = null;
 
                 if (personaAGuardar.Id == 0)
                 {
-                    persona = await PersonaRepositorio.InsertarAsync(persona);
+                    persona = await PersonaRepositorio.InsertarAsync(personaAGuardar);
                 }
                 else
                 {
@@ -84,7 +87,7 @@ namespace Persona.Dominio
                     persona.Nombre = personaAGuardar.Nombre;
                     persona.NumeroDocumento = personaAGuardar.NumeroDocumento;
 
-                    foreach (PersonaContacto contacto in persona.PersonaContacto)
+                    foreach (PersonaContacto contacto in personaAGuardar.PersonaContacto)
                     {
                         if (contacto.Id == 0)
                         {
@@ -101,6 +104,14 @@ namespace Persona.Dominio
                         }
                     }
 
+                    for (int i = 0; i < persona.PersonaContacto.Count; i++)
+                    {
+                        if (!personaAGuardar.PersonaContacto.Exists(p => p.Id == persona.PersonaContacto[i].Id))
+                        {
+                            await PersonaContactoRepositorio.EliminarAsync(persona.PersonaContacto[i]);
+                        }
+                    }
+
                     await PersonaRepositorio.ActualizarAsync(persona);
                 }
 
@@ -108,15 +119,29 @@ namespace Persona.Dominio
             }
             catch (AccesoADatosException ex)
             {
-                if (ex.Data.Count > 0)
+                DatosInvalidosException datosInvalidos = new DatosInvalidosException();
+
+                if (ex.InnerException.InnerException.Message.Contains("FK_Persona_Pais"))
                 {
-                    DatosInvalidosException datosInvalidos = new DatosInvalidosException();
+                    datosInvalidos.Data.Add("Pais invalido", "El pais no se encuentra configurado.");
+                }
+                else if (ex.InnerException.InnerException.Message.Contains("FK_Persona_Sexo"))
+                {
+                    datosInvalidos.Data.Add("Sexo invalido", "El sexo no se encuentra configurado.");
+                }
+                else if (ex.InnerException.InnerException.Message.Contains("FK_Persona_TipoDocumento"))
+                {
+                    datosInvalidos.Data.Add("Tipo Documento invalido", "El tipo de documento no se encuentra configurado.");
+                }
+
+                if (datosInvalidos.Data.Count > 0)
+                {
                     throw datosInvalidos;
                 }
-            }
-            finally
-            {
-                throw new Exception();
+                else
+                {
+                    throw new Exception();
+                }
             }
         }
 
@@ -161,7 +186,7 @@ namespace Persona.Dominio
             {
                 CantidadHombres = cantidadHombres,
                 CantidadMujeres = cantidadMujeres,
-                PorcentajeArgentinos = cantidadArgentinos * 100 / totalPersonas == 0 ? 1 : totalPersonas
+                PorcentajeArgentinos = cantidadArgentinos * 100 / (totalPersonas == 0 ? 1 : totalPersonas)
             };
         }
 

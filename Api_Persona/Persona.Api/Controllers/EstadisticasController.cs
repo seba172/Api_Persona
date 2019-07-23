@@ -27,7 +27,7 @@ namespace Persona.Api.Controllers
         /// <summary>
         /// Devuelve estadisticas de personas.
         /// </summary>
-        /// <returns>estadistica</returns>
+        /// <returns>estadisticas</returns>
         /// <response code="200">Retorna las estadisticas de personas</response>
         [Produces(typeof(dtoEstadisticas))]
         [ProducesResponseType(200)]
