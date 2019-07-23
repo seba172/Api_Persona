@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Persona.Dominio
 {
@@ -90,56 +91,64 @@ namespace Persona.Dominio
             try
             {
                 await ValidarDatosObligatoriosPersona(personaAGuardar);
-                Entidades.Persona persona = new Entidades.Persona();
-                personaAGuardar.Pais = null;
-                personaAGuardar.Sexo = null;
-                personaAGuardar.TipoDocumento = null;
 
-                if (personaAGuardar.Id == 0)
-                {
-                    persona = await PersonaRepositorio.InsertarAsync(personaAGuardar);
-                }
-                else
-                {
-                    persona = await ObtenerPersonaPrivadoAsync(personaAGuardar.Id);
+                using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {                    
+                    Entidades.Persona persona = new Entidades.Persona();
+                    personaAGuardar.Pais = null;
+                    personaAGuardar.Sexo = null;
+                    personaAGuardar.TipoDocumento = null;
 
-                    persona.Apellido = personaAGuardar.Apellido;
-                    persona.FechaNacimiento = personaAGuardar.FechaNacimiento;
-                    persona.IdPais = personaAGuardar.IdPais;
-                    persona.IdSexo = personaAGuardar.IdSexo;
-                    persona.IdTipoDocumento = personaAGuardar.IdTipoDocumento;
-                    persona.Nombre = personaAGuardar.Nombre;
-                    persona.NumeroDocumento = personaAGuardar.NumeroDocumento;
-
-                    foreach (PersonaContacto contacto in personaAGuardar.PersonaContacto)
+                    if (personaAGuardar.Id == 0)
                     {
-                        if (contacto.Id == 0)
+                        persona = await PersonaRepositorio.InsertarAsync(personaAGuardar);
+                    }
+                    else
+                    {
+                        persona = await ObtenerPersonaPrivadoAsync(personaAGuardar.Id);
+
+                        persona.Apellido = personaAGuardar.Apellido;
+                        persona.FechaNacimiento = personaAGuardar.FechaNacimiento;
+                        persona.IdPais = personaAGuardar.IdPais;
+                        persona.IdSexo = personaAGuardar.IdSexo;
+                        persona.IdTipoDocumento = personaAGuardar.IdTipoDocumento;
+                        persona.Nombre = personaAGuardar.Nombre;
+                        persona.NumeroDocumento = personaAGuardar.NumeroDocumento;
+
+                        foreach (PersonaContacto contacto in personaAGuardar.PersonaContacto)
                         {
-                            await PersonaContactoRepositorio.InsertarAsync(new PersonaContacto { IdPersona = persona.Id, Valor = contacto.Valor });
-                        }
-                        else
-                        {
-                            PersonaContacto personaContacto = await PersonaContactoRepositorio.ObtenerUnoAsync(c => c.Id == contacto.Id);
-                            if (personaContacto != null)
+                            if (contacto.Id == 0)
                             {
-                                personaContacto.Valor = contacto.Valor;
-                                await PersonaContactoRepositorio.ActualizarAsync(personaContacto);
+                                await PersonaContactoRepositorio.InsertarAsync(new PersonaContacto { IdPersona = persona.Id, Valor = contacto.Valor });
+                            }
+                            else
+                            {
+                                PersonaContacto personaContacto = await PersonaContactoRepositorio.ObtenerUnoAsync(c => c.Id == contacto.Id);
+                                if (personaContacto != null)
+                                {
+                                    personaContacto.Valor = contacto.Valor;
+                                    await PersonaContactoRepositorio.ActualizarAsync(personaContacto);
+                                }
                             }
                         }
-                    }
 
-                    for (int i = 0; i < persona.PersonaContacto.Count; i++)
-                    {
-                        if (!personaAGuardar.PersonaContacto.Exists(p => p.Id == persona.PersonaContacto[i].Id))
+                        for (int i = 0; i < persona.PersonaContacto.Count; i++)
                         {
-                            await PersonaContactoRepositorio.EliminarAsync(persona.PersonaContacto[i]);
+                            if (!personaAGuardar.PersonaContacto.Exists(p => p.Id == persona.PersonaContacto[i].Id))
+                            {
+                                await PersonaContactoRepositorio.EliminarAsync(persona.PersonaContacto[i]);
+                            }
                         }
+
+                        await PersonaRepositorio.ActualizarAsync(persona);
                     }
 
-                    await PersonaRepositorio.ActualizarAsync(persona);
-                }
+                    dtoPersona dtoPersona = await ObtenerPersonaAsync(persona.Id);
 
-                return await ObtenerPersonaAsync(persona.Id);
+                    transaction.Complete();
+
+                    return dtoPersona;
+                }
             }
             catch (AccesoADatosException ex)
             {
@@ -171,12 +180,23 @@ namespace Persona.Dominio
 
         public async Task EliminarPersonaAsync(int id)
         {
-            Entidades.Persona persona = await ObtenerPersonaPrivadoAsync(id);
-            foreach (var item in persona.PersonaContacto)
+            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                await PersonaContactoRepositorio.EliminarAsync(item);
+                Entidades.Persona persona = await ObtenerPersonaPrivadoAsync(id);
+                foreach (PersonaContacto item in persona.PersonaContacto)
+                {
+                    await PersonaContactoRepositorio.EliminarAsync(item);
+                }
+
+                List<PersonaRelacion> relacionesPersona = await ObtenerRelacionesDePersonaAsync(id);
+                foreach (PersonaRelacion relacion in relacionesPersona)
+                {
+                    await PersonaRelacionRepositorio.EliminarAsync(relacion);
+                }
+                await PersonaRepositorio.EliminarAsync(persona);
+
+                transaction.Complete();
             }
-            await PersonaRepositorio.EliminarAsync(persona);
         }
 
         public async Task<dtoEstadisticas> ObtenerEstadisticasAsync()
@@ -299,6 +319,11 @@ namespace Persona.Dominio
         private async Task<PersonaRelacion> ObtenerPersonaRelacionPrivadoAsync(int idPersona1, int idPersona2)
         {
             return await PersonaRelacionRepositorio.ObtenerUnoAsync(r => r.IdPersona1 == idPersona1 && r.IdPersona2 == idPersona2, r => r.TipoRelacion);
+        }
+
+        private async Task<List<PersonaRelacion>> ObtenerRelacionesDePersonaAsync(int id)
+        {
+            return await PersonaRelacionRepositorio.ObtenerListadoAsync(r => r.IdPersona1 == id || r.IdPersona2 == id);
         }
     }
 }

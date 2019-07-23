@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -45,6 +46,8 @@ namespace Persona.Api
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "API Persona", Version = "v1", Description = "Desafio tecnico" });
+                var filePath = Path.Combine(System.AppContext.BaseDirectory, "Api.xml");
+                c.IncludeXmlComments(filePath);
             });
         }
 
@@ -72,6 +75,7 @@ namespace Persona.Api
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "API Persona V1");
+                c.RoutePrefix = string.Empty;
             });
         }
     }

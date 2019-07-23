@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Persona.Api</name>
+    </assembly>
+    <members>
+        <member name="M:Persona.Api.Controllers.EstadisticasController.GetEstadisticas">
+            <summary>
+            Devuelve estadisticas de personas.
+            </summary>
+            <returns>estadisticas</returns>
+            <response code="200">Retorna las estadisticas de personas</response>
+        </member>
+        <member name="M:Persona.Api.Controllers.PersonasController.Get">
+            <summary>
+            Devuelve un listado de personas.
+            </summary>
+            <returns>Listado de persona</returns>
+            <response code="200">Retorna un listado de persona</response>
+        </member>
+        <member name="M:Persona.Api.Controllers.PersonasController.GetAsync(System.Int32)">
+            <summary>
+            Devuelve una Persona.
+            </summary>
+            <returns>Una persona</returns>
+            <param name="id">Id de la persona a buscar</param>
+            <response code="200">Retorna una persona</response>
+        </member>
+        <member name="M:Persona.Api.Controllers.PersonasController.Post(Persona.Entidades.Persona)">
+            <summary>
+            Crear una Persona.
+            </summary>
+            <returns>Una nueva persona creada</returns>
+            <param name="persona">Entidad persona a crear</param>
+            <response code="201">Retorna la nueva persona creada</response>
+        </member>
+        <member name="M:Persona.Api.Controllers.PersonasController.Put(System.Int32,Persona.Entidades.Persona)">
+            <summary>
+            Actualiza una Persona.
+            </summary>
+            <returns>Persona actualizar</returns>
+            <param name="id">Id persona a actualizar</param>
+            <param name="persona">Entidad persona a actualizar</param>
+            <response code="200">Retorna la persona actualizada</response>
+        </member>
+        <member name="M:Persona.Api.Controllers.PersonasController.Delete(System.Int32)">
+            <summary>
+            Elimna una Persona.
+            </summary>
+            <returns></returns>
+            <param name="id">Id persona a eliminar</param>
+            <response code="200"></response>
+        </member>
+        <member name="M:Persona.Api.Controllers.PersonasController.PostRelacion(System.Int32,System.Int32)">
+            <summary>
+            Crea relacion de padre a hij@
+            </summary>
+            <returns>Una nueva relacion creada</returns>
+            <param name="idPersona1">Id persona padre</param>
+            <param name="idPersona2">Id persona hij@</param>
+            <response code="201">Retorna la relacion creada</response>
+        </member>
+        <member name="M:Persona.Api.Controllers.PersonasController.GetRelaciones(System.Int32,System.Int32)">
+            <summary>
+            Devuelve relacion entre dos personas.
+            </summary>
+            <returns>relacion</returns>
+            <param name="idPersona1">Id persona 1</param>
+            <param name="idPersona2">Id persona 2</param>
+            <response code="200">Retorna la relacion entre dos personas</response>
+        </member>
+    </members>
+</doc>

@@ -23,13 +23,13 @@ namespace Persona.Api.Controllers
             PersonaDominio = _personaDominio;
         }
 
-        // GET: api/<controller>
-        [HttpGet]
         /// <summary>
         /// Devuelve un listado de personas.
         /// </summary>
         /// <returns>Listado de persona</returns>
         /// <response code="200">Retorna un listado de persona</response>
+        // GET: api/<controller>
+        [HttpGet]
         [Produces(typeof(List<dtoPersona>))]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
@@ -50,13 +50,14 @@ namespace Persona.Api.Controllers
             }
         }
 
-        // GET api/<controller>/5
-        [HttpGet("{id}")]
         /// <summary>
         /// Devuelve una Persona.
         /// </summary>
         /// <returns>Una persona</returns>
+        /// <param name="id">Id de la persona a buscar</param>
         /// <response code="200">Retorna una persona</response>
+        // GET api/<controller>/5
+        [HttpGet("{id}")]        
         [Produces(typeof(dtoPersona))]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
@@ -84,13 +85,14 @@ namespace Persona.Api.Controllers
             }
         }
 
-        // POST api/<controller>
-        [HttpPost]
         /// <summary>
         /// Crear una Persona.
         /// </summary>
         /// <returns>Una nueva persona creada</returns>
+        /// <param name="persona">Entidad persona a crear</param>
         /// <response code="201">Retorna la nueva persona creada</response>
+        // POST api/<controller>
+        [HttpPost]       
         [Produces(typeof(dtoPersona))]        
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
@@ -117,13 +119,15 @@ namespace Persona.Api.Controllers
             }
         }
 
-        // PUT api/<controller>/5
-        [HttpPut("{id}")]
         /// <summary>
         /// Actualiza una Persona.
         /// </summary>
         /// <returns>Persona actualizar</returns>
+        /// <param name="id">Id persona a actualizar</param>
+        /// <param name="persona">Entidad persona a actualizar</param>
         /// <response code="200">Retorna la persona actualizada</response>
+        // PUT api/<controller>/5
+        [HttpPut("{id}")]      
         [Produces(typeof(dtoPersona))]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
@@ -156,8 +160,14 @@ namespace Persona.Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Elimna una Persona.
+        /// </summary>
+        /// <returns></returns>
+        /// <param name="id">Id persona a eliminar</param>
+        /// <response code="200"></response>
         // DELETE api/<controller>/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}")]     
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
@@ -184,13 +194,15 @@ namespace Persona.Api.Controllers
             }
         }
 
-        // POST api/<controller>/idPersona1/padre/idPersona2
-        [HttpPost]
         /// <summary>
-        /// Crea relacion de padre.
+        /// Crea relacion de padre a hij@
         /// </summary>
         /// <returns>Una nueva relacion creada</returns>
+        /// <param name="idPersona1">Id persona padre</param>
+        /// <param name="idPersona2">Id persona hij@</param>
         /// <response code="201">Retorna la relacion creada</response>
+        // POST api/<controller>/idPersona1/padre/idPersona2
+        [HttpPost]      
         [Produces(typeof(dtoPersonaRelacion))]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
@@ -219,13 +231,15 @@ namespace Persona.Api.Controllers
             }
         }
 
-        // GET: api/<controller>/relaciones/1/2
-        [HttpGet]
         /// <summary>
         /// Devuelve relacion entre dos personas.
         /// </summary>
         /// <returns>relacion</returns>
+        /// <param name="idPersona1">Id persona 1</param>
+        /// <param name="idPersona2">Id persona 2</param>
         /// <response code="200">Retorna la relacion entre dos personas</response>
+        // GET: api/<controller>/relaciones/1/2
+        [HttpGet]      
         [Produces(typeof(dtoTipoRelacion))]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]

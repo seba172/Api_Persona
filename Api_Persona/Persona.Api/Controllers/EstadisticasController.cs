@@ -22,13 +22,13 @@ namespace Persona.Api.Controllers
             PersonaDominio = _personaDominio;
         }
 
-        // GET: api/<controller>
-        [HttpGet]
         /// <summary>
         /// Devuelve estadisticas de personas.
         /// </summary>
         /// <returns>estadisticas</returns>
         /// <response code="200">Retorna las estadisticas de personas</response>
+        // GET: api/<controller>
+        [HttpGet]        
         [Produces(typeof(dtoEstadisticas))]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
