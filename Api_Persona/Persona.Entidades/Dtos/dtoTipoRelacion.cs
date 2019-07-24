@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Persona.Entidades.Dtos
 {
-    public class dtoTipoRelacion
+    public class DtoTipoRelacion
     {
         public string Relacion { get; set; }
     }

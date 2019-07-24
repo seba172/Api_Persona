@@ -8,7 +8,7 @@ namespace Persona.Entidades
     public class TipoRelacion
     {
         [Key]
-        public byte Id { get; set; }
+        public int Id { get; set; }
         public string Descripcion { get; set; }
     }
 }

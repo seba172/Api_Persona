@@ -29,7 +29,7 @@ namespace Persona.Api.Controllers
         /// <response code="200">Retorna las estadisticas de personas</response>
         // GET: api/<controller>
         [HttpGet]        
-        [Produces(typeof(dtoEstadisticas))]
+        [Produces(typeof(DtoEstadisticas))]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]

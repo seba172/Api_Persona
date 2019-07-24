@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -31,6 +32,8 @@ namespace Persona.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAutoMapper();
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddScoped<PersonaContext>();
@@ -48,6 +51,7 @@ namespace Persona.Api
                 c.SwaggerDoc("v1", new Info { Title = "API Persona", Version = "v1", Description = "Desafio tecnico" });
                 var filePath = Path.Combine(System.AppContext.BaseDirectory, "Api.xml");
                 c.IncludeXmlComments(filePath);
+                c.DescribeAllEnumsAsStrings();
             });
         }
 

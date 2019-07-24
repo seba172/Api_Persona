@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Persona.Api.Models;
 using Persona.Entidades.Dtos;
@@ -17,9 +19,11 @@ namespace Persona.Api.Controllers
     public class PersonasController : Controller
     {
         private readonly IPersonaDominio PersonaDominio;
+        private readonly IMapper Mapper;
 
-        public PersonasController(IPersonaDominio _personaDominio)
+        public PersonasController(IPersonaDominio _personaDominio, IMapper _mapper)
         {
+            Mapper = _mapper;
             PersonaDominio = _personaDominio;
         }
 
@@ -30,7 +34,7 @@ namespace Persona.Api.Controllers
         /// <response code="200">Retorna un listado de persona</response>
         // GET: api/<controller>
         [HttpGet]
-        [Produces(typeof(List<dtoPersona>))]
+        [Produces(typeof(List<DtoPersona>))]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
@@ -57,8 +61,8 @@ namespace Persona.Api.Controllers
         /// <param name="id">Id de la persona a buscar</param>
         /// <response code="200">Retorna una persona</response>
         // GET api/<controller>/5
-        [HttpGet("{id}")]        
-        [Produces(typeof(dtoPersona))]
+        [HttpGet("{id}", Name = "PersonaById")]
+        [Produces(typeof(DtoPersona))]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
@@ -67,11 +71,11 @@ namespace Persona.Api.Controllers
         {
             try
             {
-                dtoPersona persona = await PersonaDominio.ObtenerPersonaAsync(id);
+                DtoPersona persona = await PersonaDominio.ObtenerPersonaAsync(id);
                 if (persona == null)
                 {
                     return NotFound();
-                }                
+                }
 
                 return Ok(persona);
             }
@@ -92,30 +96,30 @@ namespace Persona.Api.Controllers
         /// <param name="persona">Entidad persona a crear</param>
         /// <response code="201">Retorna la nueva persona creada</response>
         // POST api/<controller>
-        [HttpPost]       
-        [Produces(typeof(dtoPersona))]        
+        [HttpPost]
+        [Produces(typeof(DtoPersona))]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> Post([FromBody]Entidades.Persona persona)
+        public async Task<IActionResult> Post([FromBody]PersonaViewModelNueva personaViewModel)
         {
             try
             {
-                if (persona == null)
+                if (personaViewModel == null)
                 {
                     return BadRequest();
                 }
 
-                dtoPersona personaGuardada = await PersonaDominio.GuardarPersonaAsync(persona);
-                return StatusCode((int)HttpStatusCode.Created, personaGuardada);
+                DtoPersona personaGuardada = await PersonaDominio.InsertarPersonaAsync(Mapper.Map<Entidades.Persona>(personaViewModel));
+                return CreatedAtRoute("PersonaById", new { id = personaGuardada.Id }, personaGuardada);
             }
             catch (DatosInvalidosException ex)
             {
                 return BadRequest(Errores.GetModelStateErrores(ex.Data));
             }
-            catch
+            catch (Exception ex)
             {
-                return StatusCode(500);
+                return StatusCode(500, ex);
             }
         }
 
@@ -128,16 +132,16 @@ namespace Persona.Api.Controllers
         /// <response code="200">Retorna la persona actualizada</response>
         // PUT api/<controller>/5
         [HttpPut("{id}")]      
-        [Produces(typeof(dtoPersona))]
+        [Produces(typeof(DtoPersona))]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> Put(int id, [FromBody]Entidades.Persona persona)
+        public async Task<IActionResult> Put(int id, [FromBody]PersonaViewModelActualizar personaViewModel)
         {
             try
             {
-                if (persona == null)
+                if (personaViewModel == null)
                 {
                     return BadRequest();
                 }
@@ -147,8 +151,7 @@ namespace Persona.Api.Controllers
                     return NotFound();
                 }
 
-                persona.Id = id;
-                return Ok(await PersonaDominio.GuardarPersonaAsync(persona));
+                return Ok(await PersonaDominio.ActualizarPersonaAsync(id, Mapper.Map<Entidades.Persona>(personaViewModel)));
             }
             catch (DatosInvalidosException ex)
             {
@@ -168,7 +171,7 @@ namespace Persona.Api.Controllers
         /// <response code="200"></response>
         // DELETE api/<controller>/5
         [HttpDelete("{id}")]     
-        [ProducesResponseType(200)]
+        [ProducesResponseType(204)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
@@ -182,7 +185,7 @@ namespace Persona.Api.Controllers
                 }
 
                 await PersonaDominio.EliminarPersonaAsync(id);
-                return Ok();
+                return NoContent();
             }
             catch (DatosInvalidosException ex)
             {
@@ -202,13 +205,12 @@ namespace Persona.Api.Controllers
         /// <param name="idPersona2">Id persona hij@</param>
         /// <response code="201">Retorna la relacion creada</response>
         // POST api/<controller>/idPersona1/padre/idPersona2
-        [HttpPost]      
-        [Produces(typeof(dtoPersonaRelacion))]
+        [HttpPost("{idPersona1:int}/padre/{idPersona2:int}")]      
+        [Produces(typeof(DtoPersonaRelacion))]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        [Route("{idPersona1:int}/padre/{idPersona2:int}")]
         public async Task<IActionResult> PostRelacion([FromRoute]int idPersona1, [FromRoute]int idPersona2)
         {
             try
@@ -218,8 +220,8 @@ namespace Persona.Api.Controllers
                     return NotFound();
                 }
 
-                dtoPersonaRelacion relacionGuardada = await PersonaDominio.GuardarRelacionPadreAsync(idPersona1, idPersona2);
-                return StatusCode((int)HttpStatusCode.Created, relacionGuardada);
+                DtoPersonaRelacion relacionGuardada = await PersonaDominio.GuardarRelacionPadreAsync(idPersona1, idPersona2);
+                return CreatedAtRoute("GetRelaciones", null, relacionGuardada);
             }
             catch (DatosInvalidosException ex)
             {
@@ -239,13 +241,12 @@ namespace Persona.Api.Controllers
         /// <param name="idPersona2">Id persona 2</param>
         /// <response code="200">Retorna la relacion entre dos personas</response>
         // GET: api/<controller>/relaciones/1/2
-        [HttpGet]      
-        [Produces(typeof(dtoTipoRelacion))]
+        [HttpGet("relaciones/{idPersona1:int}/{idPersona2:int}", Name = "GetRelaciones")]      
+        [Produces(typeof(DtoTipoRelacion))]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        [Route("relaciones/{idPersona1}/{idPersona2}")]
         public async Task<IActionResult> GetRelaciones(int idPersona1, int idPersona2)
         {
             try
@@ -255,7 +256,7 @@ namespace Persona.Api.Controllers
                     return NotFound();
                 }
 
-                dtoTipoRelacion dtoTipoRelacion = await PersonaDominio.ObtenerRelacionAsync(idPersona1, idPersona2);
+                DtoTipoRelacion dtoTipoRelacion = await PersonaDominio.ObtenerRelacionAsync(idPersona1, idPersona2);
 
                 if (dtoTipoRelacion == null)
                 {

@@ -18,11 +18,11 @@ namespace Persona.Entidades
         [Required]
         public string NumeroDocumento { get; set; }
         [Required]
-        public byte IdTipoDocumento { get; set; }
+        public int IdTipoDocumento { get; set; }
         [Required]    
-        public Int16 IdPais { get; set; }
+        public int IdPais { get; set; }
         [Required]
-        public byte IdSexo { get; set; }
+        public int IdSexo { get; set; }
         [Required]
         [DataType(DataType.Date)]
         public DateTime FechaNacimiento { get; set; }

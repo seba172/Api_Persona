@@ -26,29 +26,23 @@ namespace Persona.Dominio
             TipoRelacionRepositorio = _tipoRelacionRepositorio;
         }
 
-        public async Task<List<dtoPersona>> ObtenerListadoPersonasAsync()
+        public async Task<List<DtoPersona>> ObtenerListadoPersonasAsync()
         {
             List<Entidades.Persona> personas = await PersonaRepositorio.ObtenerListadoAsync(p => p.Pais, p => p.TipoDocumento, p => p.PersonaContacto, p => p.Sexo);
 
             var dtoPersonas = (from persona in personas
-                               select new dtoPersona
+                               select new DtoPersona
                                {
                                    Apellido = persona.Apellido,
                                    Nombre = persona.Nombre,
-                                   Id = persona.Id,
                                    NumeroDocumento = persona.NumeroDocumento,
                                    FechaNacimiento = persona.FechaNacimiento,
-                                   IdSexo = persona.IdSexo,
                                    Sexo = persona.Sexo.Descripcion,
                                    TipoDocumento = persona.TipoDocumento.Descripcion,
                                    Pais = persona.Pais.Descripcion,
-                                   IdTipoDocumento = persona.IdTipoDocumento,
-                                   IdPais = persona.IdPais,
                                    PersonaContacto = (from contactos in persona.PersonaContacto
-                                                select new dtoContacto
+                                                select new DtoContacto
                                                 {
-                                                    idContacto = contactos.Id,
-                                                    idPersona = contactos.IdPersona,
                                                     Valor = contactos.Valor
                                                 }).ToList(),
                                }).ToList();
@@ -56,126 +50,40 @@ namespace Persona.Dominio
             return dtoPersonas;
         }
 
-        public async Task<dtoPersona> ObtenerPersonaAsync(int id)
+        public async Task<DtoPersona> ObtenerPersonaAsync(int id)
         {
             Entidades.Persona persona = await ObtenerPersonaPrivadoAsync(id);
             if (persona == null)
             {
                 return null;
             }
-            return new dtoPersona
+            return new DtoPersona
             {
+                Id = persona.Id,
                 Apellido = persona.Apellido,
                 Nombre = persona.Nombre,
-                Id = persona.Id,
                 NumeroDocumento = persona.NumeroDocumento,
                 FechaNacimiento = persona.FechaNacimiento,
-                IdSexo = persona.IdSexo,
                 Sexo = persona.Sexo.Descripcion,
                 TipoDocumento = persona.TipoDocumento.Descripcion,
                 Pais = persona.Pais.Descripcion,
-                IdTipoDocumento = persona.IdTipoDocumento,
-                IdPais = persona.IdPais,
                 PersonaContacto = (from contactos in persona.PersonaContacto
-                                   select new dtoContacto
+                                   select new DtoContacto
                                    {
-                                       idContacto = contactos.Id,
-                                       idPersona = contactos.IdPersona,
                                        Valor = contactos.Valor
                                    }).ToList(),
             };
-        }
-    
-        public async Task<dtoPersona> GuardarPersonaAsync(Entidades.Persona personaAGuardar)
+        }   
+
+        public async Task<DtoPersona> InsertarPersonaAsync(Entidades.Persona personaAGuardar)
         {
-            try
-            {
-                await ValidarDatosObligatoriosPersona(personaAGuardar);
+            return await GuardarPersonaAsync(personaAGuardar);
+        }
 
-                using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-                {                    
-                    Entidades.Persona persona = new Entidades.Persona();
-                    personaAGuardar.Pais = null;
-                    personaAGuardar.Sexo = null;
-                    personaAGuardar.TipoDocumento = null;
-
-                    if (personaAGuardar.Id == 0)
-                    {
-                        persona = await PersonaRepositorio.InsertarAsync(personaAGuardar);
-                    }
-                    else
-                    {
-                        persona = await ObtenerPersonaPrivadoAsync(personaAGuardar.Id);
-
-                        persona.Apellido = personaAGuardar.Apellido;
-                        persona.FechaNacimiento = personaAGuardar.FechaNacimiento;
-                        persona.IdPais = personaAGuardar.IdPais;
-                        persona.IdSexo = personaAGuardar.IdSexo;
-                        persona.IdTipoDocumento = personaAGuardar.IdTipoDocumento;
-                        persona.Nombre = personaAGuardar.Nombre;
-                        persona.NumeroDocumento = personaAGuardar.NumeroDocumento;
-
-                        foreach (PersonaContacto contacto in personaAGuardar.PersonaContacto)
-                        {
-                            if (contacto.Id == 0)
-                            {
-                                await PersonaContactoRepositorio.InsertarAsync(new PersonaContacto { IdPersona = persona.Id, Valor = contacto.Valor });
-                            }
-                            else
-                            {
-                                PersonaContacto personaContacto = await PersonaContactoRepositorio.ObtenerUnoAsync(c => c.Id == contacto.Id);
-                                if (personaContacto != null)
-                                {
-                                    personaContacto.Valor = contacto.Valor;
-                                    await PersonaContactoRepositorio.ActualizarAsync(personaContacto);
-                                }
-                            }
-                        }
-
-                        for (int i = 0; i < persona.PersonaContacto.Count; i++)
-                        {
-                            if (!personaAGuardar.PersonaContacto.Exists(p => p.Id == persona.PersonaContacto[i].Id))
-                            {
-                                await PersonaContactoRepositorio.EliminarAsync(persona.PersonaContacto[i]);
-                            }
-                        }
-
-                        await PersonaRepositorio.ActualizarAsync(persona);
-                    }
-
-                    dtoPersona dtoPersona = await ObtenerPersonaAsync(persona.Id);
-
-                    transaction.Complete();
-
-                    return dtoPersona;
-                }
-            }
-            catch (AccesoADatosException ex)
-            {
-                DatosInvalidosException datosInvalidos = new DatosInvalidosException();
-
-                if (ex.InnerException.InnerException.Message.Contains("FK_Persona_Pais"))
-                {
-                    datosInvalidos.Data.Add("Pais invalido", "El pais no se encuentra configurado.");
-                }
-                else if (ex.InnerException.InnerException.Message.Contains("FK_Persona_Sexo"))
-                {
-                    datosInvalidos.Data.Add("Sexo invalido", "El sexo no se encuentra configurado.");
-                }
-                else if (ex.InnerException.InnerException.Message.Contains("FK_Persona_TipoDocumento"))
-                {
-                    datosInvalidos.Data.Add("Tipo Documento invalido", "El tipo de documento no se encuentra configurado.");
-                }
-
-                if (datosInvalidos.Data.Count > 0)
-                {
-                    throw datosInvalidos;
-                }
-                else
-                {
-                    throw new Exception();
-                }
-            }
+        public async Task<DtoPersona> ActualizarPersonaAsync(int id, Entidades.Persona personaAGuardar)
+        {
+            personaAGuardar.Id = id;
+            return await GuardarPersonaAsync(personaAGuardar);
         }
 
         public async Task EliminarPersonaAsync(int id)
@@ -199,7 +107,7 @@ namespace Persona.Dominio
             }
         }
 
-        public async Task<dtoEstadisticas> ObtenerEstadisticasAsync()
+        public async Task<DtoEstadisticas> ObtenerEstadisticasAsync()
         {
             int cantidadMujeres = 0, cantidadHombres = 0, cantidadArgentinos = 0, totalPersonas = 0;
 
@@ -224,7 +132,7 @@ namespace Persona.Dominio
                 }
             }
 
-            return new dtoEstadisticas()
+            return new DtoEstadisticas()
             {
                 CantidadHombres = cantidadHombres,
                 CantidadMujeres = cantidadMujeres,
@@ -232,7 +140,7 @@ namespace Persona.Dominio
             };
         }
 
-        public async Task<dtoPersonaRelacion> GuardarRelacionPadreAsync(int idPersona1, int idPersona2)
+        public async Task<DtoPersonaRelacion> GuardarRelacionPadreAsync(int idPersona1, int idPersona2)
         {
             if (idPersona1 == idPersona2)
             {
@@ -267,17 +175,104 @@ namespace Persona.Dominio
             }
 
             TipoRelacion tipoRelacion = await TipoRelacionRepositorio.ObtenerUnoAsync(tr => tr.Id == personaRelacion.IdTipoRelacion);
-            return new dtoPersonaRelacion() { IdPersona1 = idPersona1, IdPersona2 = idPersona2, IdPersonaRelacion = personaRelacion.Id, Relacion = tipoRelacion.Descripcion };
+            return new DtoPersonaRelacion() { IdPersona1 = idPersona1, IdPersona2 = idPersona2, Relacion = tipoRelacion.Descripcion };
         }
 
-        public async Task<dtoTipoRelacion> ObtenerRelacionAsync(int idPersona1, int idPersona2)
+        public async Task<DtoTipoRelacion> ObtenerRelacionAsync(int idPersona1, int idPersona2)
         {
             PersonaRelacion personaRelacion = await ObtenerPersonaRelacionPrivadoAsync(idPersona1, idPersona2);
             if (personaRelacion == null)
             {
                 return null;
             }
-            return new dtoTipoRelacion() { Relacion = personaRelacion.TipoRelacion.Descripcion };
+            return new DtoTipoRelacion() { Relacion = idPersona1 + " es " + personaRelacion.TipoRelacion.Descripcion + " de " + idPersona2};
+        }
+
+        private async Task<DtoPersona> GuardarPersonaAsync(Entidades.Persona personaAGuardar)
+        {
+            try
+            {
+                await ValidarDatosObligatoriosPersona(personaAGuardar);
+
+                using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                {
+                    Entidades.Persona persona = new Entidades.Persona();
+
+                    if (personaAGuardar.Id == 0)
+                    {
+                        persona = await PersonaRepositorio.InsertarAsync(personaAGuardar);
+                    }
+                    else
+                    {
+                        persona = await ObtenerPersonaPrivadoAsync(personaAGuardar.Id);
+
+                        persona.Apellido = personaAGuardar.Apellido;
+                        persona.FechaNacimiento = personaAGuardar.FechaNacimiento;
+                        persona.IdPais = personaAGuardar.IdPais;
+                        persona.IdSexo = personaAGuardar.IdSexo;
+                        persona.IdTipoDocumento = personaAGuardar.IdTipoDocumento;
+                        persona.Nombre = personaAGuardar.Nombre;
+                        persona.NumeroDocumento = personaAGuardar.NumeroDocumento;
+
+                        foreach (PersonaContacto contacto in personaAGuardar.PersonaContacto)
+                        {
+                            string valorContacto = contacto.Valor.Trim();
+                            PersonaContacto personaContacto = await PersonaContactoRepositorio.ObtenerUnoAsync(c => c.Valor == valorContacto);
+                            if (personaContacto == null)
+                            {
+                                await PersonaContactoRepositorio.InsertarAsync(new PersonaContacto { IdPersona = persona.Id, Valor = valorContacto });
+                            }
+                            else
+                            {
+                                personaContacto.Valor = valorContacto;
+                                await PersonaContactoRepositorio.ActualizarAsync(personaContacto);
+                            }
+                        }
+
+                        for (int i = 0; i < persona.PersonaContacto.Count; i++)
+                        {
+                            if (!personaAGuardar.PersonaContacto.Exists(p => p.Valor.Trim() == persona.PersonaContacto[i].Valor))
+                            {
+                                await PersonaContactoRepositorio.EliminarAsync(persona.PersonaContacto[i]);
+                            }
+                        }
+
+                        await PersonaRepositorio.ActualizarAsync(persona);
+                    }
+
+                    DtoPersona dtoPersona = await ObtenerPersonaAsync(persona.Id);
+
+                    transaction.Complete();
+
+                    return dtoPersona;
+                }
+            }
+            catch (AccesoADatosException ex)
+            {
+                DatosInvalidosException datosInvalidos = new DatosInvalidosException();
+
+                if (ex.InnerException.InnerException.Message.Contains("FK_Persona_Pais"))
+                {
+                    datosInvalidos.Data.Add("Pais invalido", "El pais no se encuentra configurado.");
+                }
+                else if (ex.InnerException.InnerException.Message.Contains("FK_Persona_Sexo"))
+                {
+                    datosInvalidos.Data.Add("Sexo invalido", "El sexo no se encuentra configurado.");
+                }
+                else if (ex.InnerException.InnerException.Message.Contains("FK_Persona_TipoDocumento"))
+                {
+                    datosInvalidos.Data.Add("Tipo Documento invalido", "El tipo de documento no se encuentra configurado.");
+                }
+
+                if (datosInvalidos.Data.Count > 0)
+                {
+                    throw datosInvalidos;
+                }
+                else
+                {
+                    throw new Exception();
+                }
+            }
         }
 
         private async Task<bool> ValidarDatosObligatoriosPersona(Entidades.Persona persona)

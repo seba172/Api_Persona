@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Persona.Entidades.Dtos
 {
-    public class dtoEstadisticas
+    public class DtoEstadisticas
     {
         public int CantidadMujeres { get; set; }
         public int CantidadHombres { get; set; }

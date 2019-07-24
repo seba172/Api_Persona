@@ -26,7 +26,7 @@
             <param name="id">Id de la persona a buscar</param>
             <response code="200">Retorna una persona</response>
         </member>
-        <member name="M:Persona.Api.Controllers.PersonasController.Post(Persona.Entidades.Persona)">
+        <member name="M:Persona.Api.Controllers.PersonasController.Post(Persona.Api.Models.PersonaViewModelNueva)">
             <summary>
             Crear una Persona.
             </summary>
@@ -34,7 +34,7 @@
             <param name="persona">Entidad persona a crear</param>
             <response code="201">Retorna la nueva persona creada</response>
         </member>
-        <member name="M:Persona.Api.Controllers.PersonasController.Put(System.Int32,Persona.Entidades.Persona)">
+        <member name="M:Persona.Api.Controllers.PersonasController.Put(System.Int32,Persona.Api.Models.PersonaViewModelActualizar)">
             <summary>
             Actualiza una Persona.
             </summary>

@@ -12,7 +12,7 @@ namespace Persona.Entidades
         public int Id { get; set; }
         public int IdPersona1 { get; set; }
         public int IdPersona2 { get; set; }
-        public byte IdTipoRelacion { get; set; }
+        public int IdTipoRelacion { get; set; }
 
         [ForeignKey("IdTipoRelacion")]
         public TipoRelacion TipoRelacion { get; set; }

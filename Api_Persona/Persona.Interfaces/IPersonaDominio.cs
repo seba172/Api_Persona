@@ -8,12 +8,13 @@ namespace Persona.Interfaces
 {
     public interface IPersonaDominio
     {
-        Task<dtoPersona> ObtenerPersonaAsync(int id);
-        Task<List<dtoPersona>> ObtenerListadoPersonasAsync();
-        Task<dtoPersona> GuardarPersonaAsync(Entidades.Persona Persona);
+        Task<DtoPersona> ObtenerPersonaAsync(int id);
+        Task<List<DtoPersona>> ObtenerListadoPersonasAsync();
+        Task<DtoPersona> InsertarPersonaAsync(Entidades.Persona personaAGuardar);
+        Task<DtoPersona> ActualizarPersonaAsync(int id, Entidades.Persona personaAGuardar);
         Task EliminarPersonaAsync(int id);
-        Task<dtoEstadisticas> ObtenerEstadisticasAsync();
-        Task<dtoPersonaRelacion> GuardarRelacionPadreAsync(int idPersona1, int idPersona2);
-        Task<dtoTipoRelacion> ObtenerRelacionAsync(int idPersona1, int idPersona2);
+        Task<DtoEstadisticas> ObtenerEstadisticasAsync();
+        Task<DtoPersonaRelacion> GuardarRelacionPadreAsync(int idPersona1, int idPersona2);
+        Task<DtoTipoRelacion> ObtenerRelacionAsync(int idPersona1, int idPersona2);
     }
 }
