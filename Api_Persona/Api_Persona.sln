@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2036
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Aplicacion", "Aplicacion", "{2D4B1FCA-A916-4830-AB20-CB84FAE5BF29}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1 -Aplicacion", "1 -Aplicacion", "{2D4B1FCA-A916-4830-AB20-CB84FAE5BF29}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dominio", "Dominio", "{6E68EF59-2484-4B1F-969A-5A7C99F2E248}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2 - Dominio", "2 - Dominio", "{6E68EF59-2484-4B1F-969A-5A7C99F2E248}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infraestructura", "Infraestructura", "{BAC95F84-8945-4D67-BD7E-1CEB4DFE4E5D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3 - Infraestructura", "3 - Infraestructura", "{BAC95F84-8945-4D67-BD7E-1CEB4DFE4E5D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Persona.Api", "Persona.Api\Persona.Api.csproj", "{2D43C23E-9948-4D1E-AFA2-A5F9D3FCA85B}"
 EndProject
@@ -19,7 +19,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Persona.Entidades", "Person
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Persona.Repositorio", "Persona.Repositorio\Persona.Repositorio.csproj", "{04C5103D-3FC4-4317-AC87-7CE2E4C260F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Persona.Framework", "Perssona.Framework\Persona.Framework.csproj", "{AA411B86-CE91-4FCA-BD3E-950FBCD634D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Persona.Framework", "Perssona.Framework\Persona.Framework.csproj", "{AA411B86-CE91-4FCA-BD3E-950FBCD634D2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4 - BaseDatos", "4 - BaseDatos", "{D3DA2E77-2687-46F0-960A-5B79DB559270}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\..\..\Desktop\Leer\0 - Script Creacion.sql = ..\..\..\..\..\Desktop\Leer\0 - Script Creacion.sql
+		..\..\..\..\..\Desktop\Leer\1 - Script Inicializacion Datos.sql = ..\..\..\..\..\Desktop\Leer\1 - Script Inicializacion Datos.sql
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
