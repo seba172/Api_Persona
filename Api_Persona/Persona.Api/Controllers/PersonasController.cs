@@ -73,9 +73,7 @@ namespace Persona.Api.Controllers
             {
                 DtoPersona persona = await PersonaDominio.ObtenerPersonaAsync(id);
                 if (persona == null)
-                {
                     return NotFound();
-                }
 
                 return Ok(persona);
             }
@@ -105,10 +103,11 @@ namespace Persona.Api.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
                 if (personaViewModel == null)
-                {
                     return BadRequest();
-                }
 
                 DtoPersona personaGuardada = await PersonaDominio.InsertarPersonaAsync(Mapper.Map<Entidades.Persona>(personaViewModel));
                 return CreatedAtRoute("PersonaById", new { id = personaGuardada.Id }, personaGuardada);
@@ -141,15 +140,14 @@ namespace Persona.Api.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
                 if (personaViewModel == null)
-                {
                     return BadRequest();
-                }
 
                 if (await PersonaDominio.ObtenerPersonaAsync(id) == null)
-                {
                     return NotFound();
-                }
 
                 return Ok(await PersonaDominio.ActualizarPersonaAsync(id, Mapper.Map<Entidades.Persona>(personaViewModel)));
             }
@@ -216,9 +214,7 @@ namespace Persona.Api.Controllers
             try
             {
                 if (await PersonaDominio.ObtenerPersonaAsync(idPersona1) == null || await PersonaDominio.ObtenerPersonaAsync(idPersona2) == null)
-                {
                     return NotFound();
-                }
 
                 DtoPersonaRelacion relacionGuardada = await PersonaDominio.GuardarRelacionPadreAsync(idPersona1, idPersona2);
                 return CreatedAtRoute("GetRelaciones", null, relacionGuardada);
@@ -252,16 +248,12 @@ namespace Persona.Api.Controllers
             try
             {
                 if (await PersonaDominio.ObtenerPersonaAsync(idPersona1) == null || await PersonaDominio.ObtenerPersonaAsync(idPersona2) == null)
-                {
                     return NotFound();
-                }
 
                 DtoTipoRelacion dtoTipoRelacion = await PersonaDominio.ObtenerRelacionAsync(idPersona1, idPersona2);
 
                 if (dtoTipoRelacion == null)
-                {
                     return NotFound();
-                }
 
                 return Ok(dtoTipoRelacion);
             }
