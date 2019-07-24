@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Persona.Framework", "Persso
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "5 - BaseDatos", "5 - BaseDatos", "{D3DA2E77-2687-46F0-960A-5B79DB559270}"
 	ProjectSection(SolutionItems) = preProject
-		0 - Script Creacionsql.sql = 0 - Script Creacionsql.sql
+		0 - Script Creacion.sql = 0 - Script Creacion.sql
 		1 - Script Inicializacion Datos.sql = 1 - Script Inicializacion Datos.sql
 	EndProjectSection
 EndProject
