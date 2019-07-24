@@ -117,9 +117,9 @@ namespace Persona.Api.Controllers
             {
                 return BadRequest(Errores.GetModelStateErrores(ex.Data));
             }
-            catch (Exception ex)
+            catch
             {
-                return StatusCode(500, ex);
+                return StatusCode(500);
             }
         }
 
@@ -157,9 +157,9 @@ namespace Persona.Api.Controllers
             {
                 return BadRequest(Errores.GetModelStateErrores(ex.Data));
             }
-            catch (Exception ex)
+            catch
             {
-                return StatusCode(500, ex.Message);
+                return StatusCode(500);
             }
         }
 

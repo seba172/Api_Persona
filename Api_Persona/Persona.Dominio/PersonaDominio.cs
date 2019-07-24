@@ -156,27 +156,30 @@ namespace Persona.Dominio
                 personaRelacion = await ObtenerPersonaRelacionPrivadoAsync(idPersona2, idPersona1);
                 if (personaRelacion == null)
                 {
-                    personaRelacion = await PersonaRelacionRepositorio.InsertarAsync(new PersonaRelacion() { IdPersona1 = idPersona1, IdPersona2 = idPersona2, IdTipoRelacion = (byte)Entidades.Enumeraciones.TipoRelacionEnum.Padre });
+                    personaRelacion = await PersonaRelacionRepositorio.InsertarAsync(new PersonaRelacion() { IdPersona1 = idPersona1, IdPersona2 = idPersona2, IdTipoRelacion = (int)Entidades.Enumeraciones.TipoRelacionEnum.Padre });
                 }
                 else
                 {
                     DatosInvalidosException datosInvalidos = new DatosInvalidosException();
-                    datosInvalidos.Data.Add("Relacion Existente", "La persona " + idPersona1 + " ya se tiene una relacion registrada de " +  personaRelacion.TipoRelacion.Descripcion + "con la persona " + idPersona2);
-                    throw datosInvalidos;    
+                    datosInvalidos.Data.Add("Relacion Existente", "La persona " + idPersona1 + " ya se tiene una relacion registrada de " + personaRelacion.TipoRelacion.Descripcion + " con la persona " + idPersona2);
+                    throw datosInvalidos;
                 }
             }
             else
             {
-                if (personaRelacion.IdTipoRelacion != (byte)Entidades.Enumeraciones.TipoRelacionEnum.Padre)
-                {
-                    DatosInvalidosException datosInvalidos = new DatosInvalidosException();
-                    datosInvalidos.Data.Add("Relacion Existente", "La persona " + idPersona1 + " ya se tiene una relacion registrada de " + personaRelacion.TipoRelacion.Descripcion + "con la persona " + idPersona2);
-                    throw datosInvalidos;
-                }
+                DatosInvalidosException datosInvalidos = new DatosInvalidosException();
+                datosInvalidos.Data.Add("Relacion Existente", "La persona " + idPersona2 + " ya se tiene una relacion registrada de " + personaRelacion.TipoRelacion.Descripcion + " con la persona " + idPersona1);
+                throw datosInvalidos;
             }
 
             TipoRelacion tipoRelacion = await TipoRelacionRepositorio.ObtenerUnoAsync(tr => tr.Id == personaRelacion.IdTipoRelacion);
-            return new DtoPersonaRelacion() { IdPersona1 = idPersona1, IdPersona2 = idPersona2, Relacion = tipoRelacion.Descripcion };
+
+            return new DtoPersonaRelacion()
+                        {
+                            IdPersona1 = idPersona1,
+                            IdPersona2 = idPersona2,
+                            Relacion = tipoRelacion.Descripcion
+                        };
         }
 
         public async Task<DtoTipoRelacion> ObtenerRelacionAsync(int idPersona1, int idPersona2)
