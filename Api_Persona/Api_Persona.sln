@@ -29,7 +29,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "5 - BaseDatos", "5 - BaseDa
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4 - Test", "4 - Test", "{2B1451DF-6ADB-4868-8A38-FF2A774C3E2A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Persona.TestUnitario", "Persona.TestUnitario\Persona.TestUnitario.csproj", "{289378F1-7E71-4715-BD2C-BBB22293B7D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Persona.TestUnitario", "Persona.TestUnitario\Persona.TestUnitario.csproj", "{289378F1-7E71-4715-BD2C-BBB22293B7D1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

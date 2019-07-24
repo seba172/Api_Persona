@@ -1,4 +1,5 @@
-﻿using Persona.Entidades;
+﻿
+using Persona.Entidades;
 using Persona.Entidades.Dtos;
 using Persona.Framework.Excepciones;
 using Persona.Interfaces;
@@ -190,89 +191,60 @@ namespace Persona.Dominio
 
         private async Task<DtoPersona> GuardarPersonaAsync(Entidades.Persona personaAGuardar)
         {
-            try
+            await ValidarDatosObligatoriosPersona(personaAGuardar);
+
+            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
-                await ValidarDatosObligatoriosPersona(personaAGuardar);
+                Entidades.Persona persona = new Entidades.Persona();
 
-                using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                if (personaAGuardar.Id == 0)
                 {
-                    Entidades.Persona persona = new Entidades.Persona();
-
-                    if (personaAGuardar.Id == 0)
-                    {
-                        persona = await PersonaRepositorio.InsertarAsync(personaAGuardar);
-                    }
-                    else
-                    {
-                        persona = await ObtenerPersonaPrivadoAsync(personaAGuardar.Id);
-
-                        persona.Apellido = personaAGuardar.Apellido;
-                        persona.FechaNacimiento = personaAGuardar.FechaNacimiento;
-                        persona.IdPais = personaAGuardar.IdPais;
-                        persona.IdSexo = personaAGuardar.IdSexo;
-                        persona.IdTipoDocumento = personaAGuardar.IdTipoDocumento;
-                        persona.Nombre = personaAGuardar.Nombre;
-                        persona.NumeroDocumento = personaAGuardar.NumeroDocumento;
-
-                        foreach (PersonaContacto contacto in personaAGuardar.PersonaContacto)
-                        {
-                            string valorContacto = contacto.Valor.Trim();
-                            PersonaContacto personaContacto = await PersonaContactoRepositorio.ObtenerUnoAsync(c => c.Valor == valorContacto);
-                            if (personaContacto == null)
-                            {
-                                await PersonaContactoRepositorio.InsertarAsync(new PersonaContacto { IdPersona = persona.Id, Valor = valorContacto });
-                            }
-                            else
-                            {
-                                personaContacto.Valor = valorContacto;
-                                await PersonaContactoRepositorio.ActualizarAsync(personaContacto);
-                            }
-                        }
-
-                        for (int i = 0; i < persona.PersonaContacto.Count; i++)
-                        {
-                            if (!personaAGuardar.PersonaContacto.Exists(p => p.Valor.Trim() == persona.PersonaContacto[i].Valor))
-                            {
-                                await PersonaContactoRepositorio.EliminarAsync(persona.PersonaContacto[i]);
-                            }
-                        }
-
-                        await PersonaRepositorio.ActualizarAsync(persona);
-                    }
-
-                    DtoPersona dtoPersona = await ObtenerPersonaAsync(persona.Id);
-
-                    transaction.Complete();
-
-                    return dtoPersona;
-                }
-            }
-            catch (AccesoADatosException ex)
-            {
-                DatosInvalidosException datosInvalidos = new DatosInvalidosException();
-
-                if (ex.InnerException.InnerException.Message.Contains("FK_Persona_Pais"))
-                {
-                    datosInvalidos.Data.Add("Pais invalido", "El pais no se encuentra configurado.");
-                }
-                else if (ex.InnerException.InnerException.Message.Contains("FK_Persona_Sexo"))
-                {
-                    datosInvalidos.Data.Add("Sexo invalido", "El sexo no se encuentra configurado.");
-                }
-                else if (ex.InnerException.InnerException.Message.Contains("FK_Persona_TipoDocumento"))
-                {
-                    datosInvalidos.Data.Add("Tipo Documento invalido", "El tipo de documento no se encuentra configurado.");
-                }
-
-                if (datosInvalidos.Data.Count > 0)
-                {
-                    throw datosInvalidos;
+                    persona = await PersonaRepositorio.InsertarAsync(personaAGuardar);
                 }
                 else
                 {
-                    throw new Exception();
+                    persona = await ObtenerPersonaPrivadoAsync(personaAGuardar.Id);
+
+                    persona.Apellido = personaAGuardar.Apellido;
+                    persona.FechaNacimiento = personaAGuardar.FechaNacimiento;
+                    persona.IdPais = personaAGuardar.IdPais;
+                    persona.IdSexo = personaAGuardar.IdSexo;
+                    persona.IdTipoDocumento = personaAGuardar.IdTipoDocumento;
+                    persona.Nombre = personaAGuardar.Nombre;
+                    persona.NumeroDocumento = personaAGuardar.NumeroDocumento;
+
+                    foreach (PersonaContacto contacto in personaAGuardar.PersonaContacto)
+                    {
+                        string valorContacto = contacto.Valor.Trim();
+                        PersonaContacto personaContacto = await PersonaContactoRepositorio.ObtenerUnoAsync(c => c.Valor == valorContacto);
+                        if (personaContacto == null)
+                        {
+                            await PersonaContactoRepositorio.InsertarAsync(new PersonaContacto { IdPersona = persona.Id, Valor = valorContacto });
+                        }
+                        else
+                        {
+                            personaContacto.Valor = valorContacto;
+                            await PersonaContactoRepositorio.ActualizarAsync(personaContacto);
+                        }
+                    }
+
+                    for (int i = 0; i < persona.PersonaContacto.Count; i++)
+                    {
+                        if (!personaAGuardar.PersonaContacto.Exists(p => p.Valor.Trim() == persona.PersonaContacto[i].Valor))
+                        {
+                            await PersonaContactoRepositorio.EliminarAsync(persona.PersonaContacto[i]);
+                        }
+                    }
+
+                    await PersonaRepositorio.ActualizarAsync(persona);
                 }
-            }
+
+                DtoPersona dtoPersona = await ObtenerPersonaAsync(persona.Id);
+
+                transaction.Complete();
+
+                return dtoPersona;
+            }                        
         }
 
         private async Task<bool> ValidarDatosObligatoriosPersona(Entidades.Persona persona)
