@@ -180,7 +180,7 @@ namespace Persona.Dominio
             {
                 return null;
             }
-            return new DtoTipoRelacion() { Relacion = idPersona1 + " es " + personaRelacion.TipoRelacion.Descripcion + " de " + idPersona2};
+            return new DtoTipoRelacion() { RelacionDescripcion = personaRelacion.TipoRelacion.Descripcion, IdTipoRelacion = personaRelacion.IdTipoRelacion};
         }
 
         private async Task<DtoPersona> GuardarPersonaAsync(Entidades.Persona personaAGuardar)

@@ -14,8 +14,8 @@ namespace Persona.Api.Models
         public string Nombre { get; set; }
         [Required(ErrorMessage = "Debe ingresar {0}")]
         public string Apellido { get; set; }
-        [RegularExpression(@"^[0-9]{5,12}$", ErrorMessage = "{0} debe ser numerico de 5 a 12 caracteres")]
         [Required(ErrorMessage = "Debe ingresar {0}")]
+        [RegularExpression(@"^[0-9]{5,12}$", ErrorMessage = "{0} debe ser numerico de 5 a 12 caracteres")]
         public string NumeroDocumento { get; set; }
         [Required(ErrorMessage = "Debe ingresar {0}")]
         public TipoDocumentoEnum TipoDoc { get; set; }
@@ -25,6 +25,7 @@ namespace Persona.Api.Models
         public SexoEnum SexoPersona { get; set; }
         [Required(ErrorMessage = "Debe ingresar {0}")]
         public DateTime FechaNacimiento { get; set; }
+        [Required(ErrorMessage = "Debe ingresar al menos un contacto")]
         [ListaConUnElementoAtributo(ErrorMessage = "Debe ingresar al menos un contacto")]
         public List<string> Contactos { get; set; }
 

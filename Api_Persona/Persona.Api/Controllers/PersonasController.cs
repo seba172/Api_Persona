@@ -238,7 +238,7 @@ namespace Persona.Api.Controllers
         /// <response code="200">Retorna la relacion entre dos personas</response>
         // GET: api/<controller>/relaciones/1/2
         [HttpGet("relaciones/{idPersona1:int}/{idPersona2:int}", Name = "GetRelaciones")]      
-        [Produces(typeof(DtoTipoRelacion))]
+        [Produces(typeof(string))]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
@@ -255,7 +255,7 @@ namespace Persona.Api.Controllers
                 if (dtoTipoRelacion == null)
                     return NotFound();
 
-                return Ok(dtoTipoRelacion);
+                return Ok(dtoTipoRelacion.RelacionDescripcion);
             }
             catch (DatosInvalidosException ex)
             {

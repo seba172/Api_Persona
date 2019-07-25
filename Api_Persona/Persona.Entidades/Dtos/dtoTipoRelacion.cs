@@ -6,6 +6,7 @@ namespace Persona.Entidades.Dtos
 {
     public class DtoTipoRelacion
     {
-        public string Relacion { get; set; }
+        public string RelacionDescripcion { get; set; }
+        public int IdTipoRelacion { get; set; }
     }
 }
