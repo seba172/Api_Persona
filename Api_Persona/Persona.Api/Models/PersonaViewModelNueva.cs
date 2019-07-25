@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Persona.Api.Models
 {
-    public class PersonaViewModelNueva : IValidatableObject
+    public class PersonaViewModelNueva //: IValidatableObject
     {
         [Required(ErrorMessage = "Debe ingresar {0}")]
         public string Nombre { get; set; }
@@ -29,17 +29,18 @@ namespace Persona.Api.Models
         public SexoEnum SexoPersona { get; set; }
         [Required(ErrorMessage = "Debe ingresar {0}")]
         public DateTime FechaNacimiento { get; set; }
+        [Required(ErrorMessage = "Debe ingresar al menos un contacto")]
         [ListaConUnElementoAtributo(ErrorMessage = "Debe ingresar al menos un contacto")]
         public List<string> Contactos { get; set; }
 
-        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
-            if (FechaNacimiento.AddYears(18) > DateTime.Now)
-            {
-                yield return new ValidationResult(
-                    $"La persona debe ser mayor a 18 años.",
-                    new[] { "FechaNacimiento" });
-            }
-        }
+        //public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        //{
+        //    if (FechaNacimiento.AddYears(18) > DateTime.Now)
+        //    {
+        //        yield return new ValidationResult(
+        //            $"La persona debe ser mayor a 18 años.",
+        //            new[] { "FechaNacimiento" });
+        //    }
+        //}
     }
 }

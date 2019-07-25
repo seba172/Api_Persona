@@ -29,7 +29,10 @@ namespace Persona.TestUnitario.Models
             Assert.False(valido);
             Assert.Contains(validaciones, p => p.ErrorMessage.Contains("Debe ingresar NumeroDocumento"));
             Assert.Contains(validaciones, p => p.ErrorMessage.Contains("Debe ingresar Nombre"));
-            Assert.Contains(validaciones, p => p.ErrorMessage.Contains("Debe ingresar Apellido"));            
+            Assert.Contains(validaciones, p => p.ErrorMessage.Contains("Debe ingresar Apellido"));
+            Assert.Contains(validaciones, p => p.ErrorMessage.Contains("Debe ingresar al menos un contacto"));
+
+            Assert.Equal(4, validaciones.Count);
         }
     }
 }
