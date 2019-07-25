@@ -12,14 +12,14 @@ using System.Threading.Tasks;
 
 namespace Persona.Api.Models
 {
-    public class PersonaViewModelNueva //: IValidatableObject
+    public class PersonaViewModelNueva : IValidatableObject
     {
         [Required(ErrorMessage = "Debe ingresar {0}")]
         public string Nombre { get; set; }
         [Required(ErrorMessage = "Debe ingresar {0}")]
         public string Apellido { get; set; }
         [Required(ErrorMessage = "Debe ingresar {0}")]
-        [MaxLength(12, ErrorMessage = "{0} no debe ser mayor a {1} caracteres")]
+        [RegularExpression(@"^[0-9]{5,12}$", ErrorMessage = "{0} debe ser numerico de 5 a 12 caracteres")]
         public string NumeroDocumento { get; set; }
         [Required(ErrorMessage = "Debe ingresar {0}")]
         public TipoDocumentoEnum TipoDoc { get; set; }
@@ -33,14 +33,14 @@ namespace Persona.Api.Models
         [ListaConUnElementoAtributo(ErrorMessage = "Debe ingresar al menos un contacto")]
         public List<string> Contactos { get; set; }
 
-        //public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        //{
-        //    if (FechaNacimiento.AddYears(18) > DateTime.Now)
-        //    {
-        //        yield return new ValidationResult(
-        //            $"La persona debe ser mayor a 18 años.",
-        //            new[] { "FechaNacimiento" });
-        //    }
-        //}
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (FechaNacimiento.AddYears(18) > DateTime.Now)
+            {
+                yield return new ValidationResult(
+                    $"La persona debe ser mayor a 18 años.",
+                    new[] { "FechaNacimiento" });
+            }
+        }
     }
 }

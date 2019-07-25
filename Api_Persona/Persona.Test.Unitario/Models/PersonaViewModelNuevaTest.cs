@@ -10,7 +10,7 @@ using System.Net.Http;
 using System.Text;
 using Xunit;
 
-namespace Persona.TestUnitario.Models
+namespace Persona.Test.Unitario.Models
 {
     public class PersonaViewModelNuevaTest
     {
@@ -23,7 +23,7 @@ namespace Persona.TestUnitario.Models
             ValidationContext validacionContexto = new ValidationContext(personaVM, null, null);
 
             // Acto
-            bool valido = Validator.TryValidateObject(personaVM, validacionContexto, validaciones);
+            bool valido = Validator.TryValidateObject(personaVM, validacionContexto, validaciones, true);
 
             // Acierto
             Assert.False(valido);
@@ -33,6 +33,32 @@ namespace Persona.TestUnitario.Models
             Assert.Contains(validaciones, p => p.ErrorMessage.Contains("Debe ingresar al menos un contacto"));
 
             Assert.Equal(4, validaciones.Count);
+        }
+
+        [Theory]
+        [InlineData("1")]
+        [InlineData("178")]
+        [InlineData("17896547125654")]
+        [InlineData("4578787A8745")]
+        public void PersonaViewModelNueva_Validar_Documento(string numeroDocumento)
+        {
+            // Inicializacion
+            List<ValidationResult> validaciones = new List<ValidationResult>();
+            PersonaViewModelNueva personaVM = new PersonaViewModelNueva();
+            personaVM.Apellido = "Fernandez";
+            personaVM.Nombre = "Sebastian";
+            personaVM.Contactos = new List<string>() { "contacto" };
+            personaVM.FechaNacimiento = DateTime.Now.AddYears(-20);
+            personaVM.NumeroDocumento = numeroDocumento;
+
+            ValidationContext validacionContexto = new ValidationContext(personaVM, null, null);
+
+            // Acto
+            bool valido = Validator.TryValidateObject(personaVM, validacionContexto, validaciones, true);
+
+            // Acierto
+            Assert.False(valido);
+            Assert.Single(validaciones);
         }
     }
 }

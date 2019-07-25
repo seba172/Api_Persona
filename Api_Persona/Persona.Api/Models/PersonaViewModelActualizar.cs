@@ -14,8 +14,8 @@ namespace Persona.Api.Models
         public string Nombre { get; set; }
         [Required(ErrorMessage = "Debe ingresar {0}")]
         public string Apellido { get; set; }
+        [RegularExpression(@"^[0-9]{5,12}$", ErrorMessage = "{0} debe ser numerico de 5 a 12 caracteres")]
         [Required(ErrorMessage = "Debe ingresar {0}")]
-        [MaxLength(12, ErrorMessage = "{0} no debe ser mayor a {1} caracteres")]
         public string NumeroDocumento { get; set; }
         [Required(ErrorMessage = "Debe ingresar {0}")]
         public TipoDocumentoEnum TipoDoc { get; set; }
