@@ -1,6 +1,7 @@
 ﻿
 using Persona.Entidades;
 using Persona.Entidades.Dtos;
+using Persona.Entidades.Enumeraciones;
 using Persona.Framework.Excepciones;
 using Persona.Interfaces;
 using System;
@@ -92,12 +93,14 @@ namespace Persona.Dominio
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
                 Entidades.Persona persona = await ObtenerPersonaPrivadoAsync(id);
-                foreach (PersonaContacto item in persona.PersonaContacto)
+
+                List<PersonaContacto> contactosDePersona = await PersonaContactoRepositorio.ObtenerListadoAsync(c => c.IdPersona == id);
+                foreach (PersonaContacto item in contactosDePersona)
                 {
                     await PersonaContactoRepositorio.EliminarAsync(item);
                 }
 
-                List<PersonaRelacion> relacionesPersona = await ObtenerRelacionesDePersonaAsync(id);
+                List<PersonaRelacion> relacionesPersona = await PersonaRelacionRepositorio.ObtenerListadoAsync(r => r.IdPersona1 == id || r.IdPersona2 == id);
                 foreach (PersonaRelacion relacion in relacionesPersona)
                 {
                     await PersonaRelacionRepositorio.EliminarAsync(relacion);
@@ -150,41 +153,29 @@ namespace Persona.Dominio
                 throw datosInvalidos;
             }
 
-            PersonaRelacion personaRelacion = await ObtenerPersonaRelacionPrivadoAsync(idPersona1, idPersona2);
+            PersonaRelacion personaRelacion = await PersonaRelacionRepositorio.ObtenerUnoAsync(r => (r.IdPersona1 == idPersona1 && r.IdPersona2 == idPersona2) || (r.IdPersona1 == idPersona2 && r.IdPersona2 == idPersona1));
             if (personaRelacion == null)
             {
-                personaRelacion = await ObtenerPersonaRelacionPrivadoAsync(idPersona2, idPersona1);
-                if (personaRelacion == null)
-                {
-                    personaRelacion = await PersonaRelacionRepositorio.InsertarAsync(new PersonaRelacion() { IdPersona1 = idPersona1, IdPersona2 = idPersona2, IdTipoRelacion = (int)Entidades.Enumeraciones.TipoRelacionEnum.Padre });
-                }
-                else
-                {
-                    DatosInvalidosException datosInvalidos = new DatosInvalidosException();
-                    datosInvalidos.Data.Add("Relacion Existente", "La persona " + idPersona1 + " ya se tiene una relacion registrada de " + personaRelacion.TipoRelacion.Descripcion + " con la persona " + idPersona2);
-                    throw datosInvalidos;
-                }
+                personaRelacion = await PersonaRelacionRepositorio.InsertarAsync(new PersonaRelacion() { IdPersona1 = idPersona1, IdPersona2 = idPersona2, IdTipoRelacion = (int)Entidades.Enumeraciones.TipoRelacionEnum.Padre });
             }
             else
             {
                 DatosInvalidosException datosInvalidos = new DatosInvalidosException();
-                datosInvalidos.Data.Add("Relacion Existente", "La persona " + idPersona2 + " ya se tiene una relacion registrada de " + personaRelacion.TipoRelacion.Descripcion + " con la persona " + idPersona1);
+                datosInvalidos.Data.Add("Relacion Existente", "Ya existe una relacion entre las personas indicadas.");
                 throw datosInvalidos;
             }
-
-            TipoRelacion tipoRelacion = await TipoRelacionRepositorio.ObtenerUnoAsync(tr => tr.Id == personaRelacion.IdTipoRelacion);
 
             return new DtoPersonaRelacion()
                         {
                             IdPersona1 = idPersona1,
                             IdPersona2 = idPersona2,
-                            Relacion = tipoRelacion.Descripcion
+                            Relacion = TipoRelacionEnum.Padre.ToString()
                         };
         }
 
         public async Task<DtoTipoRelacion> ObtenerRelacionAsync(int idPersona1, int idPersona2)
         {
-            PersonaRelacion personaRelacion = await ObtenerPersonaRelacionPrivadoAsync(idPersona1, idPersona2);
+            PersonaRelacion personaRelacion = await PersonaRelacionRepositorio.ObtenerUnoAsync(r => r.IdPersona1 == idPersona1 && r.IdPersona2 == idPersona2, r => r.TipoRelacion);
             if (personaRelacion == null)
             {
                 return null;
@@ -284,16 +275,6 @@ namespace Persona.Dominio
         private async Task<Entidades.Persona> ObtenerPersonaPrivadoAsync(int id)
         {
             return await PersonaRepositorio.ObtenerUnoAsync(p => p.Id == id, p => p.Pais, p => p.TipoDocumento, p => p.PersonaContacto, p => p.Sexo);           
-        }
-
-        private async Task<PersonaRelacion> ObtenerPersonaRelacionPrivadoAsync(int idPersona1, int idPersona2)
-        {
-            return await PersonaRelacionRepositorio.ObtenerUnoAsync(r => r.IdPersona1 == idPersona1 && r.IdPersona2 == idPersona2, r => r.TipoRelacion);
-        }
-
-        private async Task<List<PersonaRelacion>> ObtenerRelacionesDePersonaAsync(int id)
-        {
-            return await PersonaRelacionRepositorio.ObtenerListadoAsync(r => r.IdPersona1 == id || r.IdPersona2 == id);
         }
     }
 }
